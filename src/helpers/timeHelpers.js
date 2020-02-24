@@ -19,8 +19,17 @@ const convertAlarmScheduleTimeToDate = (dayNr, time) => {
     }
 };
 
+const getManualAlarmDate = time => {
+    const result = parse(time, 'H:mm', new Date());
+    if (isFuture(result)) {
+        return result;
+    } else {
+        return add(result, {days: 1});
+    }
+};
+
 const isAlarmNow = (nextAlarm) => {
     return isThisMinute(nextAlarm);
 };
 
-export {convertAlarmScheduleTimeToDate, convertAlarmScheduleToDates, isAlarmNow};
+export {convertAlarmScheduleTimeToDate, convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate};

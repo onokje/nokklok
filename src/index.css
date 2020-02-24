@@ -7,6 +7,11 @@ body {
     sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+}
+
+div {
+    user-select: none;
 }
 
 div.app {
@@ -43,6 +48,16 @@ div.next_alarm {
     justify-content: center;
     text-align: center;
     font-size: 28px;
+    width: 100%;
+    opacity: 0.7;
+}
+
+div.alarm_override{
+    position: absolute;
+    left: 0;
+    top: 400px;
+    text-align: center;
+    font-size: 18px;
     width: 100%;
     opacity: 0.7;
 }
@@ -91,15 +106,64 @@ div.menu_open_area{
 div.menu_container {
     position: absolute;
     top: 0;
-    left: 0;
+    left: -300px;
     height: 100%;
-    width: 0;
+    width: 300px;
     background: #222;
-    transition: width 0.3s;
-
+    transition: left 0.3s;
 }
 
 div.menu_container_open {
-    width: 300px;
+   left: 0;
+}
+
+div.nav_button {
+    width: 230px;
+    text-align: center;
+    padding: 15px 25px;
+    border-radius: 50px;
+    border: solid 1px #4abfff;
+    margin: 10px;
+    cursor: pointer;
+}
+
+div.timePicker {
+    padding: 20px;
+}
+
+div.timePicker .react-timekeeper {
+    background: none;
+    box-shadow: none;
+}
+
+div.timePicker .react-timekeeper__top-bar {
+    background: none;
+}
+
+div.timePicker .react-timekeeper__clock-wrapper {
+    background: none;
+}
+
+div.timePicker .react-timekeeper__clock {
+    background: #333;
+}
+
+div.timePicker .css-n0t0em, div.timePicker .css-1se0bia, div.timePicker .css-eg4puu {
+    color: #4abfff;
+}
+
+div.timePicker .react-timekeeper__done-button {
+    display: none;
+}
+
+div.hamburger_menu {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: url('./images/hamburger.svg') no-repeat;
+    background-size: 100%;
+    cursor: pointer;
 }
 

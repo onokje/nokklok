@@ -3,9 +3,10 @@ import Time from "./Time";
 import NextAlarm from "./NextAlarm";
 import CurrentDate from "./CurrentDate";
 import {min} from 'date-fns'
-import {convertAlarmScheduleToDates, isAlarmNow} from "../helpers/timeHelpers";
+import {convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate} from "../helpers/timeHelpers";
 import AlarmButton from "./AlarmButton";
 import Menu from "./Menu";
+import AlarmOverride from "./AlarmOverride";
 
 function App() {
 
@@ -23,24 +24,38 @@ function App() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [nextAlarm, setNextAlarm] = useState(min(convertAlarmScheduleToDates(alarmSchedule)));
     const [alarmActive, setAlarmActive] = useState(false);
-    const [alarmEnabled, setAlarmEnabled] = useState(true);
+    const [alarmCooldown, setAlarmCooldown] = useState(true);
+    const [alarmOverrideActive, setAlarmOverrideActive] = useState(false);
 
     const onAlarmButtonClick = () => {
         setAlarmActive(false);
+        setAlarmOverrideActive(false);
+        setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
+    };
+
+    const setAlarm = (time) => {
+        const manualAlarmDate = getManualAlarmDate(time);
+        console.log(manualAlarmDate);
+        setAlarmOverrideActive(true);
+        setNextAlarm(manualAlarmDate);
+    };
+
+    const disableAlarmOverride = () => {
+        setAlarmOverrideActive(false);
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
     };
 
     useEffect(() => {
         const checkAlarm = () => {
-            console.log('alarmEnabled', alarmEnabled, 'alarmActive', alarmActive);
+            //console.log('alarmEnabled', alarmEnabled, 'alarmActive', alarmActive);
 
-            if (!alarmActive && alarmEnabled) {
+            if (!alarmActive && alarmCooldown) {
                 if (isAlarmNow(nextAlarm)) {
                     console.log('Alarm!');
                     setAlarmActive(true);
-                    setAlarmEnabled(false);
+                    setAlarmCooldown(false);
                     setTimeout(() => {
-                        setAlarmEnabled(true);
+                        setAlarmCooldown(true);
                     }, 61000);
                 }
 
@@ -52,21 +67,23 @@ function App() {
             checkAlarm();
         }, 1000);
         const timerMinute = setInterval(() => {
-            setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)))
+            if (!alarmOverrideActive) {
+                setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
+            }
         }, 60000);
         return () => { // Return callback to run on unmount.
             clearInterval(timerSecond);
             clearInterval(timerMinute);
         };
-    }, [alarmActive, alarmEnabled, alarmSchedule, nextAlarm]);
+    }, [alarmActive, setAlarmCooldown, alarmSchedule, nextAlarm, alarmOverrideActive]);
 
     return (
         <div className="app">
-
             <CurrentDate now={currentDate} />
             <Time time={currentDate} />
             {alarmActive ? <AlarmButton onClick={onAlarmButtonClick} /> : <NextAlarm alarmDate={nextAlarm} />}
-            <Menu />
+            {alarmOverrideActive ? <AlarmOverride /> : ''}
+            <Menu setAlarm={setAlarm} alarmOverrideActive={alarmOverrideActive} disableAlarmOverride={disableAlarmOverride} />
         </div>
     );
 }
