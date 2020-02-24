@@ -75,7 +75,7 @@ function App() {
             clearInterval(timerSecond);
             clearInterval(timerMinute);
         };
-    }, [alarmActive, setAlarmCooldown, alarmSchedule, nextAlarm, alarmOverrideActive]);
+    }, [alarmActive, setAlarmCooldown, alarmCooldown, alarmSchedule, nextAlarm, alarmOverrideActive]);
 
     return (
         <div className="app">
