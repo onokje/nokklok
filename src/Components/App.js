@@ -5,18 +5,20 @@ import CurrentDate from "./CurrentDate";
 import {min} from 'date-fns'
 import {convertAlarmScheduleToDates, isAlarmNow} from "../helpers/timeHelpers";
 import AlarmButton from "./AlarmButton";
+import Menu from "./Menu";
 
 function App() {
 
     const alarmSchedule = {
         "0": "18:27",
-        "1": "8:00",
+        "1": "12:36",
         "2": "7:30",
         "3": "7:30",
         "4": "7:30",
         "5": null,
         "6": null
     };
+
 
     const [currentDate, setCurrentDate] = useState(new Date());
     const [nextAlarm, setNextAlarm] = useState(min(convertAlarmScheduleToDates(alarmSchedule)));
@@ -60,10 +62,11 @@ function App() {
 
     return (
         <div className="app">
+
             <CurrentDate now={currentDate} />
             <Time time={currentDate} />
             {alarmActive ? <AlarmButton onClick={onAlarmButtonClick} /> : <NextAlarm alarmDate={nextAlarm} />}
-
+            <Menu />
         </div>
     );
 }
