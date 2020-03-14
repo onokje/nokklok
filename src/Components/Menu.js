@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import TimeKeeper from 'react-timekeeper';
+const electron = window.require('electron');
 
-function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride }) {
+function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButtons }) {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [timePickerOpen, setTimePickerOpen] = useState(false);
@@ -20,6 +21,18 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride }) {
         setAlarm(timeoutput.formatted24);
         setTimeout(() => setTimePickerOpen(false), 800);
     };
+
+    const renderButton = (button) => <div
+        className="nav_button"
+        key={button.label}
+        onClick={
+            (event) => {
+                button.onClick(event);
+                if (button.closeMenuOnClick) {
+                    setMenuOpen(false);
+                }
+            }
+        }>{button.label}</div>;
 
     return (
         <>
@@ -40,14 +53,17 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride }) {
                     </div> :
                     <>
                         {alarmOverrideActive && <div className="nav_button" onClick={disableAlarmOverride}>Disable override alarm</div>}
-                        <div className="nav_button">other button</div>
+                        {otherButtons.map(button => renderButton(button))}
+                        <div
+                            onClick={() => electron.remote.getCurrentWindow().close()}
+                            className="nav_button btn_close_app"
+                        >Afsluiten</div>
                     </>
                 }
 
                 <div className="hamburger_menu" onClick={() => setMenuOpen(false)} />
             </div>
         </>
-
     );
 }
 

@@ -7,9 +7,10 @@ import {convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate} from "../he
 import AlarmButton from "./AlarmButton";
 import Menu from "./Menu";
 import AlarmOverride from "./AlarmOverride";
+const electron = window.require('electron');
 
 function App() {
-
+    // 0 = sunday
     const alarmSchedule = {
         "0": "18:27",
         "1": "12:36",
@@ -17,20 +18,48 @@ function App() {
         "3": "7:30",
         "4": "7:30",
         "5": null,
-        "6": null
+        "6": "12:00"
     };
 
+    const onMessage = (event, message) => {
+        console.log(message);
+    };
+
+    useEffect(() => {
+        electron.ipcRenderer.on('scheduleUpdate', onMessage);
+
+        return () => {
+            electron.ipcRenderer.removeListener('scheduleUpdate', onMessage)
+        }
+    }, []);
+
+    const sendSqsMessage = (topic, message) => {
+        electron.ipcRenderer.send('sqsMessage', {topic, message});
+    };
+
+    const otherButtons = [
+        {
+            label: 'Tesla Pre-heat',
+            onClick: () => sendSqsMessage('commands/tesla/preheat', 'on'),
+            closeMenuOnClick: true
+        }
+    ];
 
     const [currentDate, setCurrentDate] = useState(new Date());
     const [nextAlarm, setNextAlarm] = useState(min(convertAlarmScheduleToDates(alarmSchedule)));
     const [alarmActive, setAlarmActive] = useState(false);
     const [alarmCooldown, setAlarmCooldown] = useState(true);
     const [alarmOverrideActive, setAlarmOverrideActive] = useState(false);
+    const [lightsOn, setLightsOn] = useState(false);
 
     const onAlarmButtonClick = () => {
         setAlarmActive(false);
         setAlarmOverrideActive(false);
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
+    };
+
+    const toggleLight = () => {
+        setLightsOn(!lightsOn);
     };
 
     const setAlarm = (time) => {
@@ -47,8 +76,6 @@ function App() {
 
     useEffect(() => {
         const checkAlarm = () => {
-            //console.log('alarmEnabled', alarmEnabled, 'alarmActive', alarmActive);
-
             if (!alarmActive && alarmCooldown) {
                 if (isAlarmNow(nextAlarm)) {
                     console.log('Alarm!');
@@ -58,7 +85,6 @@ function App() {
                         setAlarmCooldown(true);
                     }, 61000);
                 }
-
             }
         };
 
@@ -80,10 +106,19 @@ function App() {
     return (
         <div className="app">
             <CurrentDate now={currentDate} />
+            <div className="dragger" />
             <Time time={currentDate} />
-            {alarmActive ? <AlarmButton onClick={onAlarmButtonClick} /> : <NextAlarm alarmDate={nextAlarm} />}
+            {alarmActive ?
+                <>
+                    <AlarmButton onClick={onAlarmButtonClick} />
+                    <audio autoPlay src="alarmsound.mp3" />
+                </>
+                    : <NextAlarm alarmDate={nextAlarm} />
+            }
             {alarmOverrideActive ? <AlarmOverride /> : ''}
-            <Menu setAlarm={setAlarm} alarmOverrideActive={alarmOverrideActive} disableAlarmOverride={disableAlarmOverride} />
+            <Menu otherButtons={otherButtons} setAlarm={setAlarm} alarmOverrideActive={alarmOverrideActive} disableAlarmOverride={disableAlarmOverride} />
+            <div onClick={toggleLight} className={`light_icon ${lightsOn ? 'light_icon_on' : 'light_icon_off'}`}>
+            </div>
         </div>
     );
 }
