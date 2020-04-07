@@ -1,10 +1,28 @@
-import {parse, setDay, isFuture, add, isThisMinute} from "date-fns";
+import {parse, setDay, isFuture, add, isThisMinute, format} from "date-fns";
 
 const convertAlarmScheduleToDates = alarmSchedule => {
     const result = [];
     Object.keys(alarmSchedule).forEach(function(dayNr) {
         if (alarmSchedule[dayNr]) {
             result.push(convertAlarmScheduleTimeToDate(dayNr, alarmSchedule[dayNr]))
+        }
+    });
+    return result;
+};
+
+const convertAlarmScheduleToArrayWithWeekdays = alarmSchedule => {
+    const result = [];
+    Object.keys(alarmSchedule).forEach(function(dayNr) {
+        if (alarmSchedule[dayNr]) {
+            result.push({
+                day: format(convertAlarmScheduleTimeToDate(dayNr, alarmSchedule[dayNr]), 'EEEE'),
+                time: alarmSchedule[dayNr],
+            });
+        } else {
+            result.push({
+                day: format(convertAlarmScheduleTimeToDate(dayNr, "0:00"), 'EEEE'),
+                time: '-',
+            });
         }
     });
     return result;
@@ -32,4 +50,4 @@ const isAlarmNow = (nextAlarm) => {
     return isThisMinute(nextAlarm);
 };
 
-export {convertAlarmScheduleTimeToDate, convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate};
+export {convertAlarmScheduleTimeToDate, convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate, convertAlarmScheduleToArrayWithWeekdays};

@@ -5,6 +5,14 @@ const client  = mqtt.connect(process.env.MQTT_HOST, {
 });
 
 client.on('connect', function () {
-    client.publish('test', 'testing 123');
+    client.publish('events/nokklok/schedule', JSON.stringify({
+        "0": "18:27",
+        "1": "12:36",
+        "2": "21:23",
+        "3": null,
+        "4": "7:50",
+        "5": null,
+        "6": "12:00"
+    }));
 
 });

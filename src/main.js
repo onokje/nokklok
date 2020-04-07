@@ -13,17 +13,21 @@ let mainWindow;
 
 client.on('connect', function () {
     console.log('Mqtt connected');
-    client.subscribe('test', function (err) {
+    client.subscribe('events/tesla', function (err) {
         if (!err) {
-            client.publish('events/debug', 'Nokklok connected');
-
+            client.publish('events/debug', 'Nokklok listening to events/tesla');
+        }
+    });
+    client.subscribe('events/nokklok/schedule', function (err) {
+        if (!err) {
+            client.publish('events/debug', 'Nokklok listening to events/nokklok/schedule');
+        }
+    });
+    client.subscribe('thermo/update', function (err) {
+        if (!err) {
+            client.publish('events/debug', 'Nokklok listening to events/nokklok/schedule');
         }
     })
-});
-
-client.on('message', function (topic, message) {
-    console.log(" [x] Msg %s", message.toString());
-    mainWindow.webContents.send('scheduleUpdate', message.toString());
 });
 
 ipcMain.on('sqsMessage', (event, arg) => {
@@ -31,10 +35,9 @@ ipcMain.on('sqsMessage', (event, arg) => {
     client.publish(topic, message);
 });
 
-
 function createWindow() {
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 800, height: 480, frame: true, webPreferences: { nodeIntegration: true }});
+    mainWindow = new BrowserWindow({width: 800, height: 480, frame: false, webPreferences: { nodeIntegration: true }});
 
     // and load the index.html of the app.
     const startUrl = process.env.ELECTRON_START_URL || url.format({
@@ -50,7 +53,21 @@ function createWindow() {
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null
-    })
+    });
+
+    client.on('message', function (topic, message) {
+        switch (topic) {
+            case 'events/tesla':
+                mainWindow.webContents.send('teslaUpdate', message.toString());
+                break;
+            case 'thermo/update':
+                mainWindow.webContents.send('thermoUpdate', message.toString());
+                break;
+            case 'events/nokklok/schedule':
+                mainWindow.webContents.send('scheduleUpdate', message.toString());
+                break;
+        }
+    });
 }
 
 // This method will be called when Electron has finished

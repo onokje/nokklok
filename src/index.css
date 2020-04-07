@@ -25,22 +25,66 @@ div.app {
     position: relative;
 }
 
-div.current_date{
+div.header{
     position: absolute;
     left: 0;
-    top: 10px;
+    top: 0;
+    padding: 10px;
+    background: #222;
     text-align: center;
     font-size: 28px;
     width: 100%;
+    box-sizing: border-box;
+}
 
+div.header_tesla_statusbar {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    text-align: right;
+    display: flex;
+    align-items: center;
+}
+
+img.tesla_icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+}
+
+span.teslaData{
+    font-size: 18px;
+}
+span.teslaData_lastUpdate {
+    position: absolute;
+    right: 0;
+    top: 28px;
+    font-size: 10px;
+}
+
+div.header_thermo_statusbar {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    height: 32px;
+}
+
+span.thermoData_lastUpdate{
+    position: absolute;
+    left: 0;
+    top: 28px;
+    font-size: 10px;
 }
 
 div.dragger {
     position: absolute;
     right: 0;
     top: 0;
-    height: 20px;
-    width: 200px;
+    height: 30px;
+    width: 500px;
     -webkit-app-region: drag;
 }
 
@@ -116,11 +160,27 @@ div.menu_open_area{
 div.menu_container {
     position: absolute;
     top: 0;
-    left: -300px;
+    left: -500px;
     height: 100%;
-    width: 300px;
-    background: #222;
+    width: 500px;
+    background: #333;
     transition: left 0.3s;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+div.menu_alarm_schedule {
+    border-left: solid 1px #1a4158;
+    padding: 10px;
+}
+div.menu_alarm_schedule_table {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+div.menu_alarm_schedule_table div {
+    margin-bottom: 5px;
 }
 
 div.menu_container_open {
@@ -133,12 +193,13 @@ div.nav_button {
     padding: 15px 25px;
     border-radius: 50px;
     border: solid 1px #4abfff;
-    margin: 10px;
+    margin: 10px 10px 10px 0;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 div.timePicker {
-    padding: 20px;
+    padding: 0;
 }
 
 div.timePicker .react-timekeeper {
