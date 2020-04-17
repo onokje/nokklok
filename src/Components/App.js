@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Time from "./Time";
 import NextAlarm from "./NextAlarm";
 import Header from "./Header";
@@ -7,6 +7,8 @@ import {convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate} from "../he
 import AlarmButton from "./AlarmButton";
 import Menu from "./Menu";
 import AlarmOverride from "./AlarmOverride";
+import Websocket from "react-websocket";
+import Overlay from "./Overlay";
 const electron = window.require('electron');
 
 function App() {
@@ -31,6 +33,9 @@ function App() {
     const [lastTeslaUpdate, setLastTeslaUpdate] = useState(null);
     const [thermoData, setThermoData] = useState(null);
     const [lastThermoUpdate, setLastThermoUpdate] = useState(null);
+    const [websocketConnected, setwebsocketConnected] = useState(false);
+    const refWebsocket = useRef(null);
+    const [lightLevel, setLightLevel] = useState(10);
 
     const onTeslaEvent = (event, message) => {
         setTeslaData(JSON.parse(message));
@@ -85,6 +90,13 @@ function App() {
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
     };
 
+    const onWebSocketMessage = (data) => {
+        data = JSON.parse(data);
+        if (data.lightsensor) {
+            setLightLevel(data.lightsensor);
+        }
+    };
+
     useEffect(() => {
         const checkAlarm = () => {
             if (!alarmActive && alarmCooldown && alarmEnabled) {
@@ -127,8 +139,10 @@ function App() {
         }
     }, []);
 
+    const opacity =  lightLevel / 10;
+
     return (
-        <div className="app">
+        <div className="app" style={{ opacity }}>
             <Header
                 now={currentDate}
                 teslaData={teslaData}
@@ -155,6 +169,19 @@ function App() {
             />
             <div onClick={toggleLight} className={`light_icon ${lightsOn ? 'light_icon_on' : 'light_icon_off'}`}>
             </div>
+            <Websocket
+                url='ws://192.168.2.86:1880/ws/nokklok'
+                onMessage={onWebSocketMessage}
+                ref={Websocket => {
+                    refWebsocket.current = Websocket;
+                }}
+                onOpen={() => {
+                    setwebsocketConnected(true);
+                }}
+                onClose={() => {
+                    setwebsocketConnected(false);
+                }}
+            />
         </div>
     );
 }
