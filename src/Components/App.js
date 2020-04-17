@@ -3,12 +3,11 @@ import Time from "./Time";
 import NextAlarm from "./NextAlarm";
 import Header from "./Header";
 import {min} from 'date-fns'
-import {convertAlarmScheduleToDates, isAlarmNow, getManualAlarmDate} from "../helpers/timeHelpers";
+import {convertAlarmScheduleToDates, isAlarmNow, isPreAlarmNow, getManualAlarmDate} from "../helpers/timeHelpers";
 import AlarmButton from "./AlarmButton";
 import Menu from "./Menu";
-import AlarmOverride from "./AlarmOverride";
+import ExtraMessages from "./ExtraMessages";
 import Websocket from "react-websocket";
-import Overlay from "./Overlay";
 const electron = window.require('electron');
 
 function App() {
@@ -28,11 +27,13 @@ function App() {
     const [alarmCooldown, setAlarmCooldown] = useState(true);
     const [alarmOverrideActive, setAlarmOverrideActive] = useState(false);
     const [alarmEnabled, setAlarmEnabled] = useState(true);
+    const [preAlarmActive, setPreAlarmActive] = useState(false);
     const [lightsOn, setLightsOn] = useState(false);
     const [teslaData, setTeslaData] = useState(null);
     const [lastTeslaUpdate, setLastTeslaUpdate] = useState(null);
     const [thermoData, setThermoData] = useState(null);
     const [lastThermoUpdate, setLastThermoUpdate] = useState(null);
+    // TODO: display error icon when websocket is not connected
     const [websocketConnected, setwebsocketConnected] = useState(false);
     const refWebsocket = useRef(null);
     const [lightLevel, setLightLevel] = useState(10);
@@ -55,6 +56,10 @@ function App() {
         electron.ipcRenderer.send('sqsMessage', {topic, message});
     };
 
+    const sendWSMessage = (message) => {
+        refWebsocket.current.sendMessage(JSON.stringify(message));
+    };
+
     const otherButtons = [
         {
             label: alarmEnabled ? 'Disable all alarms' : 'Enable all alarms',
@@ -71,11 +76,13 @@ function App() {
     const onAlarmButtonClick = () => {
         setAlarmActive(false);
         setAlarmOverrideActive(false);
+        setPreAlarmActive(false);
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
     };
 
     const toggleLight = () => {
         setLightsOn(!lightsOn);
+        sendSqsMessage('commands/lights/bed1', (!lightsOn).toString());
     };
 
     const setAlarm = (time) => {
@@ -102,6 +109,7 @@ function App() {
             if (!alarmActive && alarmCooldown && alarmEnabled) {
                 if (isAlarmNow(nextAlarm)) {
                     console.log('Alarm!');
+                    sendSqsMessage('events/nokklok/alarm', 'alarm');
                     setAlarmActive(true);
                     setAlarmCooldown(false);
                     setTimeout(() => {
@@ -111,9 +119,20 @@ function App() {
             }
         };
 
+        const checkPreAlarm = () => {
+            if (!preAlarmActive && alarmCooldown && alarmEnabled) {
+                if (isPreAlarmNow(nextAlarm)) {
+                    console.log('Pre-Alarm!');
+                    sendSqsMessage('events/nokklok/alarm', 'preAlarm');
+                    setPreAlarmActive(true);
+                }
+            }
+        };
+
         const timerSecond = setInterval(() => {
             setCurrentDate(new Date());
             checkAlarm();
+            checkPreAlarm();
         }, 1000);
         const timerMinute = setInterval(() => {
             if (!alarmOverrideActive) {
@@ -124,13 +143,12 @@ function App() {
             clearInterval(timerSecond);
             clearInterval(timerMinute);
         };
-    }, [alarmActive, setAlarmCooldown, alarmCooldown, alarmSchedule, nextAlarm, alarmOverrideActive, alarmEnabled]);
+    }, [alarmActive, setAlarmCooldown, alarmCooldown, alarmSchedule, nextAlarm, alarmOverrideActive, alarmEnabled, preAlarmActive]);
 
     useEffect(() => {
         electron.ipcRenderer.on('scheduleUpdate', onScheduleUpdate);
         electron.ipcRenderer.on('teslaUpdate', onTeslaEvent);
         electron.ipcRenderer.on('thermoUpdate', onThermoUpdate);
-
 
         return () => {
             electron.ipcRenderer.removeListener('scheduleUpdate', onScheduleUpdate);
@@ -152,6 +170,9 @@ function App() {
             />
             <div className="dragger" />
             <Time time={currentDate} />
+            {preAlarmActive &&
+                <audio autoPlay src="https://edge-audio-01-cr.sharp-stream.com/rspb.mp3?" />
+            }
             {alarmActive ?
                 <>
                     <AlarmButton onClick={onAlarmButtonClick} />
@@ -159,7 +180,7 @@ function App() {
                 </>
                     : <NextAlarm alarmDate={nextAlarm} alarmEnabled={alarmEnabled} />
             }
-            {alarmOverrideActive ? <AlarmOverride /> : ''}
+            <ExtraMessages alarmOverride={alarmOverrideActive} preAlarm={preAlarmActive} />
             <Menu
                 otherButtons={otherButtons}
                 setAlarm={setAlarm}
