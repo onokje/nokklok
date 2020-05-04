@@ -160,13 +160,13 @@ div.menu_open_area{
 div.menu_container {
     position: absolute;
     top: 0;
-    left: -500px;
+    left: -800px;
     height: 100%;
-    width: 500px;
+    width: 800px;
     background: #333;
     transition: left 0.3s;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 30% 40% 30%;
     box-sizing: border-box;
     padding: 10px;
 }
@@ -175,12 +175,26 @@ div.menu_alarm_schedule {
     border-left: solid 1px #1a4158;
     padding: 10px;
 }
-div.menu_alarm_schedule_table {
+div.alarm_scheldule_day {
+    padding: 10px 25px;
+    border-radius: 50px;
+    border: solid 1px #4abfff;
+    margin: 5px 10px 10px 0;
+    cursor: pointer;
+    box-sizing: border-box;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 65% 35%;
 }
-div.menu_alarm_schedule_table div {
-    margin-bottom: 5px;
+
+div.alarm_scheldule_day_active {
+    border: solid 1px #fff;
+}
+div.schedule_btn_removeday{
+    padding: 10px 25px;
+    border-radius: 50px;
+    border: solid 1px #4abfff;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
 div.menu_container_open {
@@ -219,6 +233,11 @@ div.timePicker .react-timekeeper__clock {
     background: #333;
 }
 
+div.timePicker .css-nakgy8-TimeKeeper {
+    height: 310px;
+    width: 310px;
+}
+
 div.timePicker .css-n0t0em, div.timePicker .css-1se0bia, div.timePicker .css-eg4puu {
     color: #4abfff;
 }
@@ -236,6 +255,13 @@ div.hamburger_menu {
     background: url('./images/hamburger.svg') no-repeat;
     background-size: 100%;
     cursor: pointer;
+}
+
+div.close_menu_button{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: url('./images/hamburger.svg') no-repeat 10px 9px;
 }
 
 div.light_icon {

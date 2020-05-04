@@ -15,11 +15,13 @@ const convertAlarmScheduleToArrayWithWeekdays = alarmSchedule => {
     Object.keys(alarmSchedule).forEach(function (dayNr) {
         if (alarmSchedule[dayNr]) {
             result.push({
+                dayNr,
                 day: format(convertAlarmScheduleTimeToDate(dayNr, alarmSchedule[dayNr]), 'EEEE'),
                 time: alarmSchedule[dayNr],
             });
         } else {
             result.push({
+                dayNr,
                 day: format(convertAlarmScheduleTimeToDate(dayNr, "0:00"), 'EEEE'),
                 time: '-',
             });

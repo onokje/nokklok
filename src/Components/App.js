@@ -58,10 +58,6 @@ function App() {
         electron.ipcRenderer.send('sqsMessage', {topic, message});
     };
 
-    const sendWSMessage = (message) => {
-        refWebsocket.current.sendMessage(JSON.stringify(message));
-    };
-
     const otherButtons = [
         {
             label: alarmEnabled ? 'Disable all alarms' : 'Enable all alarms',
@@ -191,6 +187,7 @@ function App() {
                 alarmOverrideActive={alarmOverrideActive}
                 disableAlarmOverride={disableAlarmOverride}
                 alarmSchedule={alarmSchedule}
+                setAlarmSchedule={setAlarmSchedule}
             />
             <div onClick={toggleLight} className={`light_icon ${lightsOn ? 'light_icon_on' : 'light_icon_off'}`}>
             </div>

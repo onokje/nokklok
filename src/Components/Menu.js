@@ -3,10 +3,12 @@ import TimeKeeper from 'react-timekeeper';
 import { convertAlarmScheduleToArrayWithWeekdays} from "../helpers/timeHelpers";
 const electron = window.require('electron');
 
-function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButtons, alarmSchedule, alarmEnabled }) {
+function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButtons, alarmSchedule, setAlarmSchedule, alarmEnabled }) {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [timePickerOpen, setTimePickerOpen] = useState(false);
+    const [timePickerAction, setTimePickerAction] = useState('manual');
+    const [timePickerActionDay, setTimePickerActionDay] = useState(null);
 
     const openMenu = () => {
         setMenuOpen(true);
@@ -14,13 +16,33 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
 
     const setAlarmBtnClick = (event) => {
         event.stopPropagation();
+        setTimePickerAction('manual');
+        setTimePickerActionDay(null);
         setTimePickerOpen(!timePickerOpen);
     };
 
+    const setAlarmScheduleBtnClick = (event, day) => {
+        event.stopPropagation();
+        setTimePickerActionDay(day);
+        setTimePickerAction('schedule');
+        setTimePickerOpen(true);
+    };
+
     const onTimeSelect = (timeoutput) => {
-        console.log(timeoutput.formatted24);
-        setAlarm(timeoutput.formatted24);
-        setTimeout(() => setTimePickerOpen(false), 800);
+        switch (timePickerAction) {
+            case 'manual':
+                setAlarm(timeoutput.formatted24);
+                setTimeout(() => setTimePickerOpen(false), 800);
+            break;
+            case 'schedule':
+                setAlarmSchedule({...alarmSchedule, [timePickerActionDay.dayNr]: timeoutput.formatted24 });
+                setTimePickerActionDay(null);
+                break;
+        }
+    };
+
+    const disableAlarmForDay = () => {
+        setAlarmSchedule({...alarmSchedule, [timePickerActionDay.dayNr]: null });
     };
 
     const renderButton = (button) => <div
@@ -36,7 +58,16 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
         }>{button.label}</div>;
 
     const renderAlarmSchedule = () => {
-        return convertAlarmScheduleToArrayWithWeekdays(alarmSchedule).map(day => <><div>{day.day}</div><div>{day.time}</div></>);
+        return convertAlarmScheduleToArrayWithWeekdays(alarmSchedule).map(day =>
+            <>
+                <div
+                    className={`alarm_scheldule_day ${timePickerActionDay && timePickerActionDay.dayNr === day.dayNr ? 'alarm_scheldule_day_active' : ''}`}
+                    onClick={(event) => setAlarmScheduleBtnClick(event, day)}
+                >
+                    <div>{day.day}</div>
+                    <div>{day.time}</div>
+                </div>
+            </>);
     };
 
     return (
@@ -47,6 +78,15 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
             <div key="menu_container" className={`menu_container ${menuOpen && 'menu_container_open'}`}>
                 <div className={`menu_buttons`}>
                     <div className="nav_button" onClick={setAlarmBtnClick}>Set Alarm</div>
+                    {alarmOverrideActive && <div className="nav_button" onClick={disableAlarmOverride}>Disable override alarm</div>}
+                    {otherButtons.map(button => renderButton(button))}
+                    <div
+                        key="button_close"
+                        onClick={() => electron.remote.getCurrentWindow().close()}
+                        className="nav_button btn_close_app"
+                    >Quit</div>
+                </div>
+                <div className={`menu_datepicker`}>
                     {
                         timePickerOpen ?
                             <div className="timePicker">
@@ -54,30 +94,23 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
                                     switchToMinuteOnHourSelect
                                     closeOnMinuteSelect
                                     hour24Mode
+                                    time={timePickerActionDay && timePickerActionDay.time !== '-' ? timePickerActionDay.time : undefined}
                                     onDoneClick={onTimeSelect}
                                 />
-                            </div> :
-                            <>
-                                {alarmOverrideActive && <div className="nav_button" onClick={disableAlarmOverride}>Disable override alarm</div>}
-                                {otherButtons.map(button => renderButton(button))}
-                                <div
-                                    key="button_close"
-                                    onClick={() => electron.remote.getCurrentWindow().close()}
-                                    className="nav_button btn_close_app"
-                                >Quit</div>
-                            </>
+                                {timePickerAction === 'schedule' && timePickerActionDay ? <div onClick={() => disableAlarmForDay()} className={`schedule_btn_removeday`}>Disable alarm for {timePickerActionDay.day}</div> : ''}
+                            </div> : ''
                     }
-
                 </div>
                 <div className={`menu_alarm_schedule`}>
                     <b>Alarm schedule:</b><br /><br />
                     <div className={`menu_alarm_schedule_table`}>
                         {renderAlarmSchedule()}
                     </div>
-
                 </div>
 
-                <div className="hamburger_menu" onClick={() => setMenuOpen(false)} />
+                <div onClick={() => setMenuOpen(false)} className="close_menu_button nav_button">
+                    Close menu
+                </div>
 
             </div>
         </>
