@@ -10,7 +10,7 @@ import ExtraMessages from "./ExtraMessages";
 import Websocket from "react-websocket";
 const electron = window.require('electron');
 
-const {WEBSOCKET_URL } = electron.remote.getGlobal('process').env;
+const { WEBSOCKET_URL, MEDIA_PRE_ALARM, MEDIA_ALARM } = electron.remote.getGlobal('process').env;
 
 function App() {
 
@@ -79,6 +79,7 @@ function App() {
         setAlarmActive(false);
         setAlarmOverrideActive(false);
         setPreAlarmActive(false);
+        sendSqsMessage('events/nokklok/alarm', 'alarmEnd');
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
     };
 
@@ -96,6 +97,7 @@ function App() {
 
     const disableAlarmOverride = () => {
         setAlarmOverrideActive(false);
+        setPreAlarmActive(false);
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
     };
 
@@ -173,12 +175,12 @@ function App() {
             <div className="dragger" />
             <Time time={currentDate} />
             {preAlarmActive &&
-                <audio autoPlay src="https://edge-audio-01-cr.sharp-stream.com/rspb.mp3?" />
+                <audio autoPlay src={MEDIA_PRE_ALARM} />
             }
             {alarmActive ?
                 <>
                     <AlarmButton onClick={onAlarmButtonClick} />
-                    <audio autoPlay src="alarmsound.mp3" />
+                    <audio autoPlay src={MEDIA_ALARM} />
                 </>
                     : <NextAlarm alarmDate={nextAlarm} alarmEnabled={alarmEnabled} />
             }
