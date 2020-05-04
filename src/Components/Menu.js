@@ -41,10 +41,10 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
 
     return (
         <>
-            {!menuOpen && <div onClick={openMenu} className="menu_open_area">
+            {!menuOpen && <div key="menu_open_area" onClick={openMenu} className="menu_open_area">
                 <div className="hamburger_menu" />
             </div>}
-            <div className={`menu_container ${menuOpen && 'menu_container_open'}`}>
+            <div key="menu_container" className={`menu_container ${menuOpen && 'menu_container_open'}`}>
                 <div className={`menu_buttons`}>
                     <div className="nav_button" onClick={setAlarmBtnClick}>Set Alarm</div>
                     {
@@ -61,6 +61,7 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
                                 {alarmOverrideActive && <div className="nav_button" onClick={disableAlarmOverride}>Disable override alarm</div>}
                                 {otherButtons.map(button => renderButton(button))}
                                 <div
+                                    key="button_close"
                                     onClick={() => electron.remote.getCurrentWindow().close()}
                                     className="nav_button btn_close_app"
                                 >Quit</div>

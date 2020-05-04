@@ -10,6 +10,8 @@ import ExtraMessages from "./ExtraMessages";
 import Websocket from "react-websocket";
 const electron = window.require('electron');
 
+const {WEBSOCKET_URL } = electron.remote.getGlobal('process').env;
+
 function App() {
 
     const [alarmSchedule, setAlarmSchedule] = useState({
@@ -191,7 +193,7 @@ function App() {
             <div onClick={toggleLight} className={`light_icon ${lightsOn ? 'light_icon_on' : 'light_icon_off'}`}>
             </div>
             <Websocket
-                url='ws://192.168.2.86:1880/ws/nokklok'
+                url={WEBSOCKET_URL}
                 onMessage={onWebSocketMessage}
                 ref={Websocket => {
                     refWebsocket.current = Websocket;
