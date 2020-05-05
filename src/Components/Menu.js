@@ -43,6 +43,8 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
                 }, 800);
 
                 break;
+            default:
+                console.error('unknown timepicker action: ',timePickerAction);
         }
 
     };

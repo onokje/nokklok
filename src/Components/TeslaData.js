@@ -8,18 +8,18 @@ function TeslaData({teslaData, lastTeslaUpdate}) {
     }
 
     const {
-        battery_level, charge_limit_soc, battery_range, minutes_to_full_charge, charger_power, charging_state
+        battery_level, charge_limit_soc, charger_power, charging_state
     } = teslaData.charge_state;
-    const {is_climate_on, inside_temp, outside_temp} = teslaData.climate_state;
+    const {is_climate_on} = teslaData.climate_state;
 
     const getStatusText = () => {
         if (charging_state === "Charging") {
-            return <span> | <b>Charging</b> to {charge_limit_soc}% ({charger_power}kw)</span>;
+            return <span> | <b>Charging</b> to {charge_limit_soc}% ({charger_power}kw) {is_climate_on ? ' (Climate On)' : ''}</span>;
         }
         if (charging_state === "Disconnected") {
-            return null;
+            return <span>{is_climate_on ? ' | (Climate On)' : ''}</span>;
         }
-        return <span> | {charging_state}</span>;
+        return <span> | {charging_state} {is_climate_on ? ' (Climate On)' : ''}</span>;
     };
 
     const getLastUpdate = () => {
