@@ -45,9 +45,9 @@ function App() {
         setLastTeslaUpdate(new Date());
     };
 
-    const onScheduleUpdate = (event, message) => {
-        console.log('update', message);
+    const onScheduleUpdateMessage = (event, message) => {
         setAlarmSchedule(message);
+        setNextAlarm(min(convertAlarmScheduleToDates(message)));
     };
 
     const onThermoUpdate = (event, message) => {
@@ -107,6 +107,7 @@ function App() {
 
     const saveAlarmSchedule = (schedule) => {
         setAlarmSchedule(schedule);
+        setNextAlarm(min(convertAlarmScheduleToDates(schedule)));
         electron.ipcRenderer.send('saveSchedule', schedule);
     };
 
@@ -152,12 +153,12 @@ function App() {
     }, [alarmActive, setAlarmCooldown, alarmCooldown, alarmSchedule, nextAlarm, alarmOverrideActive, alarmEnabled, preAlarmActive]);
 
     useEffect(() => {
-        electron.ipcRenderer.on('scheduleUpdate', onScheduleUpdate);
+        electron.ipcRenderer.on('scheduleUpdate', onScheduleUpdateMessage);
         electron.ipcRenderer.on('teslaUpdate', onTeslaEvent);
         electron.ipcRenderer.on('thermoUpdate', onThermoUpdate);
 
         return () => {
-            electron.ipcRenderer.removeListener('scheduleUpdate', onScheduleUpdate);
+            electron.ipcRenderer.removeListener('scheduleUpdate', onScheduleUpdateMessage);
             electron.ipcRenderer.removeListener('teslaUpdate', onTeslaEvent);
             electron.ipcRenderer.removeListener('thermoUpdate', onThermoUpdate);
         }

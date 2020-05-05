@@ -74,6 +74,7 @@ function createWindow() {
                 mainWindow.webContents.send('thermoUpdate', message.toString());
                 break;
             case 'events/nokklok/schedule':
+                console.log('Recieved schedule update from mqtt. Updating schedule.');
                 alarmSchedule = JSON.parse(message.toString());
                 saveAlarmSchedule(alarmSchedule);
                 mainWindow.webContents.send('scheduleUpdate', alarmSchedule);
@@ -89,8 +90,8 @@ function createWindow() {
     });
     mainWindow.loadURL(startUrl);
     let contents = mainWindow.webContents;
-    contents.on('did-finish-load', function(){
-        console.log('sending update');
+    contents.once('did-finish-load', function(){
+        console.log('sending schedule from file');
         mainWindow.webContents.send('scheduleUpdate', alarmSchedule);
     });
 }
