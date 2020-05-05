@@ -15,10 +15,11 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
     };
 
     const setAlarmBtnClick = (event) => {
+        console.log('klik');
         event.stopPropagation();
         setTimePickerAction('manual');
         setTimePickerActionDay(null);
-        setTimePickerOpen(!timePickerOpen);
+        setTimePickerOpen(true);
     };
 
     const setAlarmScheduleBtnClick = (event, day) => {

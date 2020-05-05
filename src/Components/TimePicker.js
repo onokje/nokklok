@@ -3,7 +3,8 @@ import TimeKeeper from "react-timekeeper";
 
 function TimePicker({ timePickerActionDay, onTimeSelect, timePickerAction, disableAlarmForDay }) {
 
-    if (!timePickerActionDay) {
+    console.log(timePickerAction, timePickerActionDay);
+    if (timePickerAction === 'schedule' && !timePickerActionDay) {
         return null;
     }
     console.log('timePickerActionDay', timePickerActionDay);
