@@ -82,7 +82,7 @@ function App() {
 
     const toggleLight = () => {
         setLightsOn(!lightsOn);
-        sendSqsMessage('commands/lights/bed1', (!lightsOn).toString());
+        sendWSMessage({lights: !lightsOn});
     };
 
     const setAlarm = (time) => {
@@ -103,6 +103,10 @@ function App() {
         if (data.lightsensor) {
             setLightLevel(data.lightsensor);
         }
+    };
+
+    const sendWSMessage = (message) => {
+        refWebsocket.current.sendMessage(JSON.stringify(message));
     };
 
     const saveAlarmSchedule = (schedule) => {
