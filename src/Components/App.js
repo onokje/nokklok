@@ -46,7 +46,8 @@ function App() {
     };
 
     const onScheduleUpdate = (event, message) => {
-        setAlarmSchedule(JSON.parse(message));
+        console.log('update', message);
+        setAlarmSchedule(message);
     };
 
     const onThermoUpdate = (event, message) => {
@@ -102,6 +103,11 @@ function App() {
         if (data.lightsensor) {
             setLightLevel(data.lightsensor);
         }
+    };
+
+    const saveAlarmSchedule = (schedule) => {
+        setAlarmSchedule(schedule);
+        electron.ipcRenderer.send('saveSchedule', schedule);
     };
 
     useEffect(() => {
@@ -187,7 +193,7 @@ function App() {
                 alarmOverrideActive={alarmOverrideActive}
                 disableAlarmOverride={disableAlarmOverride}
                 alarmSchedule={alarmSchedule}
-                setAlarmSchedule={setAlarmSchedule}
+                saveAlarmSchedule={saveAlarmSchedule}
             />
             <div onClick={toggleLight} className={`light_icon ${lightsOn ? 'light_icon_on' : 'light_icon_off'}`}>
             </div>

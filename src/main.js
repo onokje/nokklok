@@ -1,4 +1,5 @@
 require('dotenv').config();
+const fs = require('fs-extra');
 const { app, ipcMain, BrowserWindow } = require('electron');
 const path = require('path');
 const url = require('url');
@@ -6,6 +7,14 @@ const mqtt = require('mqtt');
 const client  = mqtt.connect(process.env.MQTT_HOST, {
     username: process.env.MQTT_USERNAME, password: process.env.MQTT_PASSWORD
 });
+
+let alarmSchedule;
+try {
+    alarmSchedule = fs.readJsonSync('./schedule.json');
+} catch (e) {
+    alarmSchedule = {"0":null,"1":null,"2":null,"3":null,"4":null,"5":null,"6":null}
+}
+console.log('Alarm schedule loaded: ', alarmSchedule);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -35,17 +44,18 @@ ipcMain.on('sqsMessage', (event, arg) => {
     client.publish(topic, message);
 });
 
+ipcMain.on('saveSchedule', (event, schedule) => {
+    saveAlarmSchedule(schedule);
+    console.log('schedule saved');
+});
+
+function saveAlarmSchedule(scheduleData) {
+    fs.outputJsonSync('./schedule.json', scheduleData);
+}
+
 function createWindow() {
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 480, frame: false, webPreferences: { nodeIntegration: true }});
-
-    // and load the index.html of the app.
-    const startUrl = process.env.ELECTRON_START_URL || url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-    });
-    mainWindow.loadURL(startUrl);
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
@@ -64,9 +74,24 @@ function createWindow() {
                 mainWindow.webContents.send('thermoUpdate', message.toString());
                 break;
             case 'events/nokklok/schedule':
-                mainWindow.webContents.send('scheduleUpdate', message.toString());
+                alarmSchedule = JSON.parse(message.toString());
+                saveAlarmSchedule(alarmSchedule);
+                mainWindow.webContents.send('scheduleUpdate', alarmSchedule);
                 break;
         }
+    });
+
+    // and load the index.html of the app.
+    const startUrl = process.env.ELECTRON_START_URL || url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+    });
+    mainWindow.loadURL(startUrl);
+    let contents = mainWindow.webContents;
+    contents.on('did-finish-load', function(){
+        console.log('sending update');
+        mainWindow.webContents.send('scheduleUpdate', alarmSchedule);
     });
 }
 

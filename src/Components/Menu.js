@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
-import TimeKeeper from 'react-timekeeper';
 import { convertAlarmScheduleToArrayWithWeekdays} from "../helpers/timeHelpers";
+import TimePicker from "./TimePicker";
 const electron = window.require('electron');
 
-function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButtons, alarmSchedule, setAlarmSchedule, alarmEnabled }) {
+function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButtons, alarmSchedule, saveAlarmSchedule, alarmEnabled }) {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [timePickerOpen, setTimePickerOpen] = useState(false);
@@ -23,6 +23,7 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
 
     const setAlarmScheduleBtnClick = (event, day) => {
         event.stopPropagation();
+        console.log('day', day);
         setTimePickerActionDay(day);
         setTimePickerAction('schedule');
         setTimePickerOpen(true);
@@ -35,14 +36,19 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
                 setTimeout(() => setTimePickerOpen(false), 800);
             break;
             case 'schedule':
-                setAlarmSchedule({...alarmSchedule, [timePickerActionDay.dayNr]: timeoutput.formatted24 });
-                setTimePickerActionDay(null);
+                saveAlarmSchedule({...alarmSchedule, [timePickerActionDay.dayNr]: timeoutput.formatted24 });
+                setTimeout(() => {
+                    setTimePickerOpen(false);
+                    setTimePickerActionDay(null);
+                }, 800);
+
                 break;
         }
+
     };
 
     const disableAlarmForDay = () => {
-        setAlarmSchedule({...alarmSchedule, [timePickerActionDay.dayNr]: null });
+        saveAlarmSchedule({...alarmSchedule, [timePickerActionDay.dayNr]: null });
     };
 
     const renderButton = (button) => <div
@@ -88,17 +94,12 @@ function Menu({ setAlarm, alarmOverrideActive, disableAlarmOverride, otherButton
                 </div>
                 <div className={`menu_datepicker`}>
                     {
-                        timePickerOpen ?
-                            <div className="timePicker">
-                                <TimeKeeper
-                                    switchToMinuteOnHourSelect
-                                    closeOnMinuteSelect
-                                    hour24Mode
-                                    time={timePickerActionDay && timePickerActionDay.time !== '-' ? timePickerActionDay.time : undefined}
-                                    onDoneClick={onTimeSelect}
-                                />
-                                {timePickerAction === 'schedule' && timePickerActionDay ? <div onClick={() => disableAlarmForDay()} className={`schedule_btn_removeday`}>Disable alarm for {timePickerActionDay.day}</div> : ''}
-                            </div> : ''
+                        timePickerOpen && <TimePicker
+                            timePickerActionDay={timePickerActionDay}
+                            onTimeSelect={onTimeSelect}
+                            timePickerAction={timePickerAction}
+                            disableAlarmForDay={disableAlarmForDay}
+                            />
                     }
                 </div>
                 <div className={`menu_alarm_schedule`}>
