@@ -1,7 +1,14 @@
 import React from 'react';
-import {format, formatDistanceStrict, differenceInHours} from 'date-fns'
+import {format, formatDistanceStrict, differenceInHours, isValid} from 'date-fns'
 
 function NextAlarm({ alarmDate, alarmEnabled }) {
+    if (!alarmDate || !isValid(alarmDate)) {
+        return (
+            <div className={`next_alarm`}>
+                Lekker uitslapen!
+            </div>
+        );
+    }
 
     const sleepIn = (differenceInHours(alarmDate, new Date()) > 24);
     if (sleepIn || !alarmEnabled) {

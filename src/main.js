@@ -88,7 +88,7 @@ function createWindow() {
         protocol: 'file:',
         slashes: true
     });
-    mainWindow.setFullScreen(true);
+    //mainWindow.setFullScreen(true);
     mainWindow.loadURL(startUrl);
     let contents = mainWindow.webContents;
     contents.once('did-finish-load', function(){

@@ -15,13 +15,13 @@ const { WEBSOCKET_URL, MEDIA_PRE_ALARM, MEDIA_ALARM } = electron.remote.getGloba
 function App() {
 
     const [alarmSchedule, setAlarmSchedule] = useState({
-        "0": "18:27",
-        "1": "12:36",
-        "2": "7:30",
-        "3": "7:30",
-        "4": "7:30",
-        "5": null,
-        "6": "12:00"
+        "0": null,
+        "1": "8:00",
+        "2": "8:00",
+        "3": "8:00",
+        "4": "8:00",
+        "5": "8:00",
+        "6": null
     });     // 0 = sunday
     const [currentDate, setCurrentDate] = useState(new Date());
     const [nextAlarm, setNextAlarm] = useState(min(convertAlarmScheduleToDates(alarmSchedule)));
@@ -38,7 +38,6 @@ function App() {
     // TODO: display error icon when websocket is not connected
     const [websocketConnected, setwebsocketConnected] = useState(false);
     const refWebsocket = useRef(null);
-    const [lightLevel, setLightLevel] = useState(10);
 
     const onTeslaEvent = (event, message) => {
         setTeslaData(JSON.parse(message));
@@ -98,11 +97,12 @@ function App() {
         setNextAlarm(min(convertAlarmScheduleToDates(alarmSchedule)));
     };
 
+    /**
+     * currently unused
+     * @param data
+     */
     const onWebSocketMessage = (data) => {
         data = JSON.parse(data);
-        if (data.lightsensor) {
-            setLightLevel(data.lightsensor);
-        }
     };
 
     const sendWSMessage = (message) => {
@@ -168,10 +168,8 @@ function App() {
         }
     }, []);
 
-    const opacity =  lightLevel / 10;
-
     return (
-        <div className="app" style={{ opacity }}>
+        <div className="app">
             <Header
                 now={currentDate}
                 teslaData={teslaData}
